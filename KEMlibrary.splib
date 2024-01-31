@@ -1,0 +1,360 @@
+// This is the KEM library file for Tamarin
+
+functions: kem_pk/1
+
+
+#ifdef not noConsistency
+restriction Consistency:
+"
+All k1 k2 ct seck pub #i #j. Decaps(k1, ct, pub, seck)@#i  & Decaps(k2, ct, pub, seck)@#j ==> k1 = k2
+"
+#endif
+
+#ifdef not noCorrectness
+restriction Correctness1:
+"
+All k1 k2 ct seck #i #j #k. Decaps(k1, ct, kem_pk(seck), seck) @#i & Encaps(k2, ct, kem_pk(seck))@#j & GoodKey(kem_pk(seck))@#k ==> k1 = k2
+"
+
+restriction Correctness2:
+"
+All k1 k2 ct seck #i #j #k. Decaps(k1, ct, kem_pk(seck), seck) @#i & AttEncaps(k2, ct, kem_pk(seck))@#j & GoodKey(kem_pk(seck))@#k ==> k1 = k2
+"
+
+
+#endif
+
+#ifdef not NoCCA
+restriction IND_CCA:
+"
+All k k2 ct ct2 pub pub2 #i #j #k. Encaps(k, ct, pub) @#i & Encaps(k2, ct2, pub2)@#j & not(#i=#j) & GoodKey(pub)@#k ==> not(k = k2)
+"
+
+restriction IND_CCA2:
+"
+All k ct ct2 pub pub2 #i #j #k. Encaps(k, ct, pub) @#i & Encaps(k, ct2, pub2)@#j & #i=#j & GoodKey(pub)@#k ==> ct = ct & pub = pub2
+"
+
+
+// Without this restriction secrecy of output keys does not hold.
+// The adversary computes a decaps via `attComputeDecaps` that
+// gives the same output key for different public key/ciphertext.
+// This lemma has to hold even for `bad keys`.
+// Basically, we say that decaps can only be successful if ciphertext
+// and output key were created via an encaps.
+// We believe that this is reasonable; at least for explicitly
+// rejecting KEMs.
+
+restriction DecapsOrigin:
+"
+All k ct seck #i. Decaps(k, ct, kem_pk(seck), seck) @#i ==> ((Ex #k. Encaps(k, ct, kem_pk(seck))@#k & #k < #i) | (Ex #k. AttEncaps(k, ct, kem_pk(seck))@#k & #k < #i))
+"
+
+#endif
+
+#ifdef GoodKeysOnly
+
+restriction DecapsKeyOrigin:
+"
+All k ct pub seck #i. Decaps(k, ct, pub, seck) @#i ==> (Ex #k. GoodKey(pub)@#k)
+"
+
+restriction EncapsKeyOrigin:
+"
+All k ct pub #i. Encaps(k, ct, pub) @#i ==> (Ex #k. GoodKey(pub)@#k)
+"
+
+restriction AttEncapsKeyOrigin:
+"
+All k ct pub #i. AttEncaps(k, ct, pub) @#i ==> (Ex #k. GoodKey(pub)@#k)
+"
+
+#endif
+
+rule KeyValues[color=4d587a]:
+    [Fr(~k)]
+    -->
+    [!KeyValues(~k)]
+
+rule CTValues[color=4d587a]:
+    [Fr(~ct)]
+    -->
+    [!CTValues(~ct)]
+
+rule attKeyGen[color=82a5ac]:
+    [ Fr(~sk) ]
+    --[ GoodKey(kem_pk(~sk)) ]->
+    [ Out(kem_pk(~sk)), Out(~sk) ]
+
+rule attComputingHonestEncaps[color=82a5ac]:
+    [In(pub), !KeyValues(k), !CTValues(ct)]
+    --[Encaps(k, ct, pub)]->
+    [Out(k), Out(ct)]
+
+// This rule only carries the `AttEncaps(...)` action fact and not the
+// `Encaps(...)` action fact because the IND-CCA restriction would
+// then prohibit the attacker from creating re-encapsulations.
+rule attComputingMaliciousEncaps[color=82a5ac]:
+    [In(pub), In(k), !CTValues(ct)]
+    --[AttEncaps(k, ct, pub)]->
+    [Out(k), Out(ct)]
+
+// `AttDecaps` is just needed for testing.
+rule attComputingDecaps[color=93b2b1]:
+    [In(ct), In(seck), !KeyValues(k)]
+    --[Decaps(k, ct, kem_pk(seck), seck), AttDecaps(k, ct, kem_pk(seck), seck)]->
+    [Out(k)]
+
+
+#ifdef bindktoct & not MAL
+restriction k_bind_ct:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & k=k2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> ct=ct2
+"
+#endif
+
+
+
+
+#ifdef bindktoct & MAL
+restriction k_bind_ct_decaps:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & k=k2 ==> ct=ct2
+"
+
+restriction k_bind_ct_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)@#j & k=k2 ==> ct=ct2
+"
+
+restriction k_bind_ct_encaps_decaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. Decaps(k, ct, pub, seck)@#i & Encaps(k2, ct2, pub2)@#j & k=k2 ==> ct=ct2
+"
+
+restriction k_bind_ct_att_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & k=k2 ==> ct=ct2
+"
+
+restriction k_bind_ct_att_encaps_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)@#j & k=k2 ==> ct=ct2
+"
+
+restriction k_bind_ct_att_encaps_decaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & k=k2 ==> ct=ct2
+"
+#endif
+
+
+
+
+#ifdef bindktopk & not MAL
+restriction k_bind_pk:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & k=k2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> pub=pub2
+"
+#endif
+
+
+
+
+#ifdef bindktopk & MAL
+restriction k_bind_pk_decaps:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & k=k2 ==> pub=pub2
+"
+
+restriction k_bind_pk_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)@#j & k=k2 ==> pub=pub2
+"
+
+restriction k_bind_pk_encaps_decaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. Encaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & k=k2 ==> pub=pub2
+"
+
+restriction k_bind_pk_att_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & k=k2 ==> pub=pub2
+"
+
+restriction k_bind_pk_att_encaps_decaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & k=k2 ==> pub=pub2
+"
+
+restriction k_bind_pk_att_encaps_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)@#j & k=k2 ==> pub=pub2
+"
+#endif
+
+
+
+
+#ifdef bindcttok & not MAL
+restriction ct_bind_k:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> k=k2
+"
+#endif
+
+
+
+
+#ifdef bindcttok & MAL
+restriction ct_bind_k_decaps:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 ==> k=k2
+"
+
+restriction ct_bind_k_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)@#j & ct=ct2 ==> k=k2
+"
+
+restriction ct_bind_k_encaps_decaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. Encaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & ct=ct2 ==> k=k2
+"
+
+restriction ct_bind_k_att_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & ct=ct2 ==> k=k2
+"
+
+restriction ct_bind_k_att_encaps_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & ct=ct2 ==> k=k2
+"
+
+restriction ct_bind_k_att_encaps_decaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & ct=ct2 ==> k=k2
+"
+#endif
+
+
+
+
+#ifdef bindcttopk & not MAL
+restriction ct_bind_pk:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> pub=pub2
+"
+#endif
+
+#ifdef bindcttopk & MAL
+restriction ct_bind_pk_decaps:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 ==> pub=pub2
+"
+
+restriction ct_bind_pk_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)@#j & ct=ct2 ==> pub=pub2
+"
+
+restriction ct_bind_pk_decaps_encaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. Decaps(k, ct, pub, seck)@#i & Encaps(k2, ct2, pub2)@#j & ct=ct2 ==> pub=pub2
+"
+
+restriction ct_bind_pk_att_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & ct=ct2 ==> pub=pub2
+"
+
+restriction ct_bind_pk_att_encaps_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & ct=ct2 ==> pub=pub2
+"
+
+restriction ct_bind_pk_decaps_att_encaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. Decaps(k, ct, pub, seck)@#i & AttEncaps(k2, ct2, pub2)@#j & ct=ct2 ==> pub=pub2
+"
+#endif
+
+#ifdef bindkcttopk & not MAL
+restriction k_ct_bind_pk:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 & k=k2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> pub=pub2
+"
+#endif
+
+#ifdef bindkcttopk & MAL
+restriction k_ct_bind_pk_decaps:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 & k=k2 ==> pub=pub2
+"
+
+restriction k_ct_bind_pk_decaps_encaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. Encaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & ct=ct2 & k=k2 ==> pub=pub2
+"
+
+restriction k_ct_bind_pk_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)@#j & ct=ct2 & k=k2 ==> pub=pub2
+"
+
+restriction k_ct_bind_pk_att_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & ct=ct2 & k=k2 ==> pub=pub2
+"
+
+restriction k_ct_bind_pk_att_encaps_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & ct=ct2 & k=k2 ==> pub=pub2
+"
+
+restriction k_ct_bind_pk_decaps_att_encaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & ct=ct2 & k=k2 ==> pub=pub2
+"
+#endif
+
+#ifdef bindpkktoct & not MAL
+restriction pk_k_bind_ct:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & pub=pub2 & k=k2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> ct=ct2
+"
+#endif
+
+#ifdef bindpkktoct & MAL
+restriction pk_k_bind_ct_decaps:
+"
+All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & pub=pub2 & k=k2  ==> ct=ct2
+"
+
+restriction pk_k_bind_ct_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)@#j & pub=pub2 & k=k2  ==> ct=ct2
+"
+
+restriction pk_k_bind_ct_encaps_decaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. Encaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & pub=pub2 & k=k2  ==> ct=ct2
+"
+
+restriction pk_k_bind_ct_att_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & pub=pub2 & k=k2  ==> ct=ct2
+"
+
+restriction pk_k_bind_ct_att_encaps_encaps:
+"
+All k k2 ct ct2 pub pub2 #i #j. Encaps(k, ct, pub)@#i & AttEncaps(k2, ct2, pub2)@#j & pub=pub2 & k=k2  ==> ct=ct2
+"
+
+restriction pk_k_bind_ct_att_encaps_decaps:
+"
+All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & pub=pub2 & k=k2  ==> ct=ct2
+"
+#endif
+    

@@ -1,0 +1,228 @@
+// Based on CRYSTALS – Kyber: a CCA-secure module-lattice-based KEM.
+// Page 8, Figure 3.
+
+theory Kyber_AKE_Verification begin
+
+#include "../KEMlibrary.splib"
+
+builtins: hashing, symmetric-encryption
+
+
+
+tactic: secrecy
+presort: S
+prio:
+  regex "Encaps\("
+prio:
+  regex "!KU\( ~sk"
+prio:
+  regex "!KU\( ~k"
+prio:
+  regex "!KU\( h\("
+prio:
+  regex "!KU\( kem_pk\("
+deprio:
+  regex "GoodKey"
+deprio:
+  regex "!KU\( ~ct"
+
+
+tactic: sanity
+presort: S
+prio:
+  regex "Encaps\("
+prio:
+  regex "!KU\( ~sk"
+prio:
+  regex "!KU\( ~k"
+prio:
+  regex "!KU\( h\("
+deprio:
+  regex "GoodKey"
+deprio:
+  regex "!KU\( ~ct"
+
+
+restriction Neq:
+  "All a b #i. Neq(a, b) @ i ==> not(a = b)"
+
+rule static_keygen:
+ let
+  pk = kem_pk(~sk)
+ in
+ [ Fr(~sk) ]
+ --[ HonestPk(pk), GoodKey(pk) ]->
+ [ !Ltk(~sk, pk), Out(pk) ]
+
+rule static_reveal[color=a33b20]:
+ [ !Ltk(~sk, pk) ] --[ RevealLtk(pk) ]-> [ Out(~sk) ]
+
+rule ephemeral_keygen:
+ let
+  pk = kem_pk(~sk)
+ in
+ [ Fr(~sk) ]
+ --[ GoodKey(pk), EphOrigin(pk) ]->
+ [ Eph(~sk, pk), Out(pk) ]
+
+rule Create_Initiator:
+  [ Fr(~IId) , !Ltk(isk, ipk) , Eph(esk_i, epk_i) , In(peer) ]
+  --[ Neq(ipk, peer), CreateInit() ]->
+  [ Initiator_0(~IId, isk, ipk, esk_i, epk_i, peer) ]
+
+rule Create_Responder:
+  [ Fr(~RId), !Ltk(rsk, rpk), In(peer) ]
+  --[ Neq(rpk, peer), CreateResp() ]->
+  [ Responder_0(~RId, rsk, rpk, peer) ]
+
+rule Snd_M1:
+  [ Initiator_0(~IId, isk, ipk, esk_i, epk_i, rpk)
+  , !KeyValues(k), !CTValues(ct) ]
+  --[ Initiator_Running(~IId, ipk, rpk, k)
+    , Encaps(k, ct, rpk)
+    , InitEncaps(k, ct, rpk)
+    , SecondInit() ]->
+  [ Initiator_1(~IId, isk, ipk, esk_i, epk_i, rpk, k)
+  , Out(<epk_i, ct>) ]
+
+rule Rcv_M1_Snd_M2:
+  let
+    k_3 = h(k, k_1, k_2)
+  in
+  [ Responder_0(~RId, rsk, rpk, ipk)
+  , !KeyValues(k), !KeyValues(k_1), !KeyValues(k_2)
+  , !CTValues(ct_1) , !CTValues(ct_2)
+  , In(<epk_i, ct>) ]
+  --[ Responder_Commit(~RId, rpk, ipk, epk_i, k_3)
+    , Responder_Commit_Key_Confirmation(~RId, rpk, ipk, k)
+    , Secret_Responder(~RId, rpk, ipk, epk_i, k_3)
+    , Decaps(k, ct, rpk, rsk)
+    , RespDecaps(k, ct, rpk, rsk)
+    , Encaps(k_1, ct_1, ipk)
+    , Encaps(k_2, ct_2, epk_i)
+    , SecondResp() ]->
+  [ Responder_1(~RId, rsk, ipk, k_3)
+  , Out(<ct_1, ct_2>) ]
+
+rule Rcv_M2:
+  let
+    k_3 = h(k, k_1, k_2)
+  in
+  [ Initiator_1(~IId, isk, ipk, esk_i, epk_i, rpk, k), In(<ct_1, ct_2>)
+  , !KeyValues(k_1), !KeyValues(k_2) ]
+  --[ Initiator_Commit(~IId, ipk, rpk, k_3)
+    , Secret_Initiator(~IId, ipk, rpk, epk_i, k_3)
+    , Decaps(k_1, ct_1, ipk, isk)
+    , Decaps(k_2, ct_2, epk_i, esk_i)
+    , FinalResp() ]->
+  []
+
+
+
+lemma Executable3[heuristic={sanity}]: exists-trace
+  "Ex IId IPk RPk Key #k.
+      (All #i0 #i1. CreateInit()@i0 & CreateInit()@i1 ==> #i0=#i1) &
+      (All #i2 #i3. CreateResp()@i2 & CreateResp()@i3 ==> #i2=#i3) &
+      (All #i4 #i5. SecondInit()@i4 & SecondInit()@i5 ==> #i4=#i5) &
+      (All #i6 #i7. SecondResp()@i6 & SecondResp()@i7 ==> #i6=#i7) &
+      (All #i8 #i9. FinalResp()@i8 & FinalResp()@i9 ==> #i8=#i9) &
+      (All a b #x #y. EphOrigin(a)@x & EphOrigin(b)@y ==> #x=#y) &
+      not(Ex k #j. RevealLtk(k)@j) &
+      Initiator_Commit(IId, IPk, RPk, Key) @ k"
+
+lemma Executable2[heuristic={sanity}]: exists-trace
+  "Ex IId IPk RPk Key EPki #k.
+  (All #i0 #i1. CreateInit()@i0 & CreateInit()@i1 ==> #i0=#i1) &
+  (All #i2 #i3. CreateResp()@i2 & CreateResp()@i3 ==> #i2=#i3) &
+  (All #i4 #i5. SecondInit()@i4 & SecondInit()@i5 ==> #i4=#i5) &
+  (All #i6 #i7. SecondResp()@i6 & SecondResp()@i7 ==> #i6=#i7) &
+  (All #i8 #i9. FinalResp()@i8 & FinalResp()@i9 ==> #i8=#i9) &
+      Responder_Commit(IId, IPk, RPk, EPki, Key) @ k"
+
+lemma Executable[heuristic={sanity}]: exists-trace
+  "Ex IId IPk RId RPk Key EPki #j #k.
+  (All #i0 #i1. CreateInit()@i0 & CreateInit()@i1 ==> #i0=#i1) &
+  (All #i2 #i3. CreateResp()@i2 & CreateResp()@i3 ==> #i2=#i3) &
+  (All #i4 #i5. SecondInit()@i4 & SecondInit()@i5 ==> #i4=#i5) &
+  (All #i6 #i7. SecondResp()@i6 & SecondResp()@i7 ==> #i6=#i7) &
+  (All #i8 #i9. FinalResp()@i8 & FinalResp()@i9 ==> #i8=#i9) &
+      Responder_Commit(RId, RPk, IPk, EPki, Key) @ j &
+      Initiator_Commit(IId, IPk, RPk, Key) @ k"
+
+lemma Key_Uniqueness_Initiator_helper [reuse]:
+  "All IId1 IId2 IPk1 IPk2 RPk1 RPk2 Key #i #j #h.
+       Initiator_Commit(IId1, IPk1, RPk1, Key) @ i &
+       Initiator_Commit(IId2, IPk2, RPk2, Key) @ j & i < j &
+       GoodKey(RPk1) @ h
+       ==> F"
+
+lemma Key_Uniqueness_Initiator:
+  "All IId1 IId2 IPk1 IPk2 RPk1 RPk2 Key #i #j #k.
+       (Initiator_Commit(IId1, IPk1, RPk1, Key) @ i & not(#i = #j) &
+       Initiator_Commit(IId2, IPk2, RPk2, Key) @ j) & GoodKey(RPk1) @ k
+       ==> F"
+
+lemma Key_Uniqueness_Responder_helper_AKE [reuse]:
+  "All RId1 RId2 RPk1 RPk2 IPk1 IPk2 EPki1 EPki2 Key #i #j #h.
+       Responder_Commit(RId1, RPk1, IPk1, EPki1, Key) @ i &
+       Responder_Commit(RId2, RPk2, IPk2, EPki2, Key) @ j & i < j &
+       GoodKey(IPk1) @ h
+       ==> F"
+
+lemma Key_Uniqueness_Responder_AKE:
+  "All RId1 RId2 RPk1 RPk2 IPk1 IPk2 EPki1 EPki2 Key #i #j #h.
+       (Responder_Commit(RId1, RPk1, IPk1, EPki1, Key) @ i & not(#i = #j) &
+       Responder_Commit(RId2, RPk2, IPk2, EPki2, Key) @ j) & GoodKey(IPk1) @ h
+       ==> F"
+
+
+
+lemma Secrecy_Initiator_Unless_Reveal_Ltk[use_induction, heuristic={secrecy}]:
+  "All IId Ipk Rpk Epki Key #i #j.
+       Secret_Initiator(IId, Ipk, Rpk, Epki, Key) @ i &
+       HonestPk(Rpk) @ j
+       ==> (not(Ex #j. K(Key) @ j))
+       | (Ex #j. RevealLtk(Rpk) @ j)"
+
+// Should falsify
+lemma Secrecy_Initiator[use_induction, heuristic={secrecy}]:
+  "All IId Ipk Rpk Epki Key #i #j.
+       Secret_Initiator(IId, Ipk, Rpk, Epki, Key) @ i &
+       HonestPk(Rpk) @ j
+       ==> (not(Ex #j. K(Key) @ j))"
+
+
+lemma Secrecy_Responder_Unless_Reveal_Ltk[use_induction, heuristic={secrecy}]:
+  "All RId Key Rpk Ipk Epki #i #j.
+       Secret_Responder(RId, Rpk, Ipk, Epki, Key) @ i &
+       HonestPk(Ipk) @ j
+       ==> (not(Ex #j. K(Key) @ j))
+         | (Ex #j. RevealLtk(Ipk) @ j)"
+
+
+// Should falsify since adv can impersonate Ipk
+lemma Secrecy_Responder[use_induction, heuristic={secrecy}]:
+  "All RId Key Rpk Ipk Epki #i #j.
+       Secret_Responder(RId, Rpk, Ipk, Epki, Key) @ i &
+       HonestPk(Ipk) @ j
+       ==> (not(Ex #j. K(Key) @ j))"
+
+
+
+lemma Implicit_Key_Authentication_Initiator[use_induction, heuristic={secrecy}]:
+  "All IId RId IPk IPk1 RPk RPk1 Key EPki #i #j #h.
+       Initiator_Commit(IId, IPk, RPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPki, Key) @ j &
+       HonestPk(RPk) @ h &
+       not(Ex #v. RevealLtk(RPk) @ v)
+       ==> IPk = IPk1 & RPk = RPk1"
+
+lemma Implicit_Key_Authentication_Responder[use_induction, heuristic={secrecy}]:
+  "All IId RId IPk IPk1 RPk RPk1 Key EPki #i #j #h.
+       Initiator_Commit(IId, IPk, RPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPki, Key) @ j &
+       HonestPk(IPk1) @ h &
+       not(Ex #v. RevealLtk(IPk1) @ v)
+       ==> IPk = IPk1 & RPk = RPk1"
+
+end

@@ -1,0 +1,111 @@
+// Kyber/Kyber_AKE_EventBased_Model.spthy_Implicit_Key_Authentication_Responder_MAL_1706475366.137692
+digraph {
+	node [color=green style=filled]
+	"bindktoct, bindcttopk, bindcttok" [label="bindktoct, bindcttopk, bindcttok"]
+	node [color=green style=filled]
+	"bindktoct, bindcttopk" [label="bindktoct, bindcttopk"]
+	node [color=green style=filled]
+	"bindktoct, bindktopk, bindcttok" [label="bindktoct, bindktopk, bindcttok"]
+	node [color=green style=filled]
+	"bindpkktoct, bindktopk, bindcttopk, bindcttok" [label="bindpkktoct, bindktopk, bindcttopk, bindcttok"]
+	node [color=green style=filled]
+	"bindpkktoct, bindktopk, bindcttopk" [label="bindpkktoct, bindktopk, bindcttopk"]
+	node [color=green style=filled]
+	"bindktoct, bindktopk" [label="bindktoct, bindktopk"]
+	node [color=green style=filled]
+	"bindpkktoct, bindktopk, bindcttok" [label="bindpkktoct, bindktopk, bindcttok"]
+	node [color=green style=filled]
+	"bindktoct, bindkcttopk, bindcttok" [label="bindktoct, bindkcttopk, bindcttok"]
+	node [color=green style=filled]
+	"bindktopk, bindcttopk, bindcttok" [label="bindktopk, bindcttopk, bindcttok"]
+	node [color=red style=filled]
+	"bindpkktoct, bindcttopk, bindcttok" [label="bindpkktoct, bindcttopk, bindcttok"]
+	node [color=green style=filled]
+	"bindktopk, bindcttopk" [label="bindktopk, bindcttopk"]
+	node [color=red style=filled]
+	"bindpkktoct, bindcttopk" [label="bindpkktoct, bindcttopk"]
+	node [color=green style=filled]
+	"bindpkktoct, bindktopk" [label="bindpkktoct, bindktopk"]
+	node [color=green style=filled]
+	"bindktoct, bindkcttopk" [label="bindktoct, bindkcttopk"]
+	node [color=green style=filled]
+	"bindktopk, bindcttok" [label="bindktopk, bindcttok"]
+	node [color=red style=filled]
+	"bindpkktoct, bindkcttopk, bindcttok" [label="bindpkktoct, bindkcttopk, bindcttok"]
+	node [color=red style=filled]
+	"bindktoct, bindcttok" [label="bindktoct, bindcttok"]
+	node [color=red style=filled]
+	"bindcttopk, bindcttok" [label="bindcttopk, bindcttok"]
+	node [color=green style=filled]
+	bindktopk [label=bindktopk]
+	node [color=red style=filled]
+	bindcttopk [label=bindcttopk]
+	node [color=red style=filled]
+	bindkcttopk [label=bindkcttopk]
+	node [color=red style=filled]
+	"bindpkktoct, bindkcttopk" [label="bindpkktoct, bindkcttopk"]
+	node [color=red style=filled]
+	bindpkktoct [label=bindpkktoct]
+	node [color=red style=filled]
+	bindktoct [label=bindktoct]
+	node [color=red style=filled]
+	"bindkcttopk, bindcttok" [label="bindkcttopk, bindcttok"]
+	node [color=red style=filled]
+	"bindpkktoct, bindcttok" [label="bindpkktoct, bindcttok"]
+	node [color=red style=filled]
+	bindcttok [label=bindcttok]
+	"bindktoct, bindcttopk, bindcttok" -> "bindktoct, bindcttopk"
+	"bindktoct, bindcttopk, bindcttok" -> "bindktoct, bindktopk, bindcttok"
+	"bindktoct, bindcttopk, bindcttok" -> "bindpkktoct, bindktopk, bindcttopk, bindcttok"
+	"bindktoct, bindcttopk" -> "bindpkktoct, bindktopk, bindcttopk"
+	"bindktoct, bindcttopk" -> "bindktoct, bindktopk"
+	"bindktoct, bindktopk, bindcttok" -> "bindktoct, bindktopk"
+	"bindktoct, bindktopk, bindcttok" -> "bindpkktoct, bindktopk, bindcttok"
+	"bindktoct, bindktopk, bindcttok" -> "bindktoct, bindkcttopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttopk, bindcttok" -> "bindpkktoct, bindktopk, bindcttopk"
+	"bindpkktoct, bindktopk, bindcttopk, bindcttok" -> "bindpkktoct, bindktopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttopk, bindcttok" -> "bindktopk, bindcttopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttopk, bindcttok" -> "bindpkktoct, bindcttopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttopk" -> "bindktopk, bindcttopk"
+	"bindpkktoct, bindktopk, bindcttopk" -> "bindpkktoct, bindcttopk"
+	"bindpkktoct, bindktopk, bindcttopk" -> "bindpkktoct, bindktopk"
+	"bindktoct, bindktopk" -> "bindpkktoct, bindktopk"
+	"bindktoct, bindktopk" -> "bindktoct, bindkcttopk"
+	"bindpkktoct, bindktopk, bindcttok" -> "bindpkktoct, bindktopk"
+	"bindpkktoct, bindktopk, bindcttok" -> "bindktopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttok" -> "bindpkktoct, bindkcttopk, bindcttok"
+	"bindktoct, bindkcttopk, bindcttok" -> "bindktoct, bindkcttopk"
+	"bindktoct, bindkcttopk, bindcttok" -> "bindpkktoct, bindkcttopk, bindcttok"
+	"bindktoct, bindkcttopk, bindcttok" -> "bindktoct, bindcttok"
+	"bindktopk, bindcttopk, bindcttok" -> "bindktopk, bindcttok"
+	"bindktopk, bindcttopk, bindcttok" -> "bindcttopk, bindcttok"
+	"bindktopk, bindcttopk, bindcttok" -> "bindktopk, bindcttopk"
+	"bindpkktoct, bindcttopk, bindcttok" -> "bindcttopk, bindcttok"
+	"bindpkktoct, bindcttopk, bindcttok" -> "bindpkktoct, bindkcttopk, bindcttok"
+	"bindpkktoct, bindcttopk, bindcttok" -> "bindpkktoct, bindcttopk"
+	"bindktopk, bindcttopk" -> bindktopk
+	"bindktopk, bindcttopk" -> bindcttopk
+	"bindpkktoct, bindcttopk" -> bindcttopk
+	"bindpkktoct, bindcttopk" -> "bindpkktoct, bindkcttopk"
+	"bindpkktoct, bindktopk" -> bindktopk
+	"bindpkktoct, bindktopk" -> "bindpkktoct, bindkcttopk"
+	"bindktoct, bindkcttopk" -> bindktoct
+	"bindktoct, bindkcttopk" -> bindkcttopk
+	"bindktopk, bindcttok" -> bindktopk
+	"bindktopk, bindcttok" -> "bindkcttopk, bindcttok"
+	"bindpkktoct, bindkcttopk, bindcttok" -> "bindkcttopk, bindcttok"
+	"bindpkktoct, bindkcttopk, bindcttok" -> "bindpkktoct, bindcttok"
+	"bindktoct, bindcttok" -> "bindpkktoct, bindcttok"
+	"bindktoct, bindcttok" -> bindktoct
+	"bindcttopk, bindcttok" -> bindcttopk
+	"bindcttopk, bindcttok" -> "bindkcttopk, bindcttok"
+	bindktopk -> bindkcttopk
+	bindcttopk -> bindkcttopk
+	"bindpkktoct, bindkcttopk" -> bindkcttopk
+	"bindpkktoct, bindkcttopk" -> bindpkktoct
+	bindktoct -> bindpkktoct
+	"bindkcttopk, bindcttok" -> bindcttok
+	"bindkcttopk, bindcttok" -> bindkcttopk
+	"bindpkktoct, bindcttok" -> bindpkktoct
+	"bindpkktoct, bindcttok" -> bindcttok
+}

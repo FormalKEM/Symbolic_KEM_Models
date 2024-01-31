@@ -1,0 +1,88 @@
+// Sigma_Zero/Sigma.spthy_SK_Authentication_1706438051.898558
+digraph {
+	node [color=green style=filled]
+	"bindktoct, bindcttopk" [label="bindktoct, bindcttopk"]
+	node [color=green style=filled]
+	"bindpkktoct, bindktopk, bindcttopk" [label="bindpkktoct, bindktopk, bindcttopk"]
+	node [color=green style=filled]
+	"bindktoct, bindktopk, bindcttok" [label="bindktoct, bindktopk, bindcttok"]
+	node [color=green style=filled]
+	"bindktopk, bindcttopk" [label="bindktopk, bindcttopk"]
+	node [color=green style=filled]
+	"bindpkktoct, bindcttopk" [label="bindpkktoct, bindcttopk"]
+	node [color=green style=filled]
+	"bindpkktoct, bindktopk, bindcttok" [label="bindpkktoct, bindktopk, bindcttok"]
+	node [color=red style=filled]
+	"bindktoct, bindktopk" [label="bindktoct, bindktopk"]
+	node [color=green style=filled]
+	"bindktoct, bindkcttopk, bindcttok" [label="bindktoct, bindkcttopk, bindcttok"]
+	node [color=green style=filled]
+	bindcttopk [label=bindcttopk]
+	node [color=green style=filled]
+	"bindktopk, bindcttok" [label="bindktopk, bindcttok"]
+	node [color=green style=filled]
+	"bindpkktoct, bindkcttopk, bindcttok" [label="bindpkktoct, bindkcttopk, bindcttok"]
+	node [color=red style=filled]
+	"bindpkktoct, bindktopk" [label="bindpkktoct, bindktopk"]
+	node [color=red style=filled]
+	"bindktoct, bindkcttopk" [label="bindktoct, bindkcttopk"]
+	node [color=green style=filled]
+	"bindktoct, bindcttok" [label="bindktoct, bindcttok"]
+	node [color=green style=filled]
+	"bindkcttopk, bindcttok" [label="bindkcttopk, bindcttok"]
+	node [color=red style=filled]
+	"bindpkktoct, bindktoct, bindcttopk" [label="bindpkktoct, bindktoct, bindcttopk"]
+	node [color=green style=filled]
+	"bindpkktoct, bindcttok" [label="bindpkktoct, bindcttok"]
+	node [color=red style=filled]
+	bindktoct [label=bindktoct]
+	node [color=red style=filled]
+	bindkcttopk [label=bindkcttopk]
+	node [color=green style=filled]
+	bindcttok [label=bindcttok]
+	node [color=red style=filled]
+	bindktopk [label=bindktopk]
+	node [color=red style=filled]
+	bindpkktoct [label=bindpkktoct]
+	"bindktoct, bindcttopk" -> "bindpkktoct, bindktopk, bindcttopk"
+	"bindktoct, bindcttopk" -> "bindktoct, bindktopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttopk" -> "bindktopk, bindcttopk"
+	"bindpkktoct, bindktopk, bindcttopk" -> "bindpkktoct, bindcttopk"
+	"bindpkktoct, bindktopk, bindcttopk" -> "bindpkktoct, bindktopk, bindcttok"
+	"bindktoct, bindktopk, bindcttok" -> "bindpkktoct, bindktopk, bindcttok"
+	"bindktoct, bindktopk, bindcttok" -> "bindktoct, bindktopk"
+	"bindktoct, bindktopk, bindcttok" -> "bindktoct, bindkcttopk, bindcttok"
+	"bindktopk, bindcttopk" -> bindcttopk
+	"bindktopk, bindcttopk" -> "bindktopk, bindcttok"
+	"bindpkktoct, bindcttopk" -> bindcttopk
+	"bindpkktoct, bindcttopk" -> "bindpkktoct, bindkcttopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttok" -> "bindktopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttok" -> "bindpkktoct, bindkcttopk, bindcttok"
+	"bindpkktoct, bindktopk, bindcttok" -> "bindpkktoct, bindktopk"
+	"bindktoct, bindktopk" -> "bindpkktoct, bindktopk"
+	"bindktoct, bindktopk" -> "bindktoct, bindkcttopk"
+	"bindktoct, bindkcttopk, bindcttok" -> "bindktoct, bindcttok"
+	"bindktoct, bindkcttopk, bindcttok" -> "bindktoct, bindkcttopk"
+	"bindktoct, bindkcttopk, bindcttok" -> "bindpkktoct, bindkcttopk, bindcttok"
+	bindcttopk -> bindkcttopk
+	bindcttopk -> bindcttok
+	"bindktopk, bindcttok" -> "bindkcttopk, bindcttok"
+	"bindktopk, bindcttok" -> bindktopk
+	"bindpkktoct, bindkcttopk, bindcttok" -> "bindkcttopk, bindcttok"
+	"bindpkktoct, bindkcttopk, bindcttok" -> "bindpkktoct, bindktoct, bindcttopk"
+	"bindpkktoct, bindkcttopk, bindcttok" -> "bindpkktoct, bindcttok"
+	"bindpkktoct, bindktopk" -> "bindpkktoct, bindktoct, bindcttopk"
+	"bindpkktoct, bindktopk" -> bindktopk
+	"bindktoct, bindkcttopk" -> "bindpkktoct, bindktoct, bindcttopk"
+	"bindktoct, bindkcttopk" -> bindktoct
+	"bindktoct, bindcttok" -> bindktoct
+	"bindktoct, bindcttok" -> bindcttok
+	"bindkcttopk, bindcttok" -> bindkcttopk
+	"bindkcttopk, bindcttok" -> bindcttok
+	"bindpkktoct, bindktoct, bindcttopk" -> bindkcttopk
+	"bindpkktoct, bindktoct, bindcttopk" -> bindpkktoct
+	"bindpkktoct, bindcttok" -> bindcttok
+	"bindpkktoct, bindcttok" -> bindpkktoct
+	bindktoct -> bindpkktoct
+	bindktopk -> bindkcttopk
+}

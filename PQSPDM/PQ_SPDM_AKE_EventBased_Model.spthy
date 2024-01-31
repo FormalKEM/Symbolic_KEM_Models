@@ -1,0 +1,364 @@
+// Based on Post Quantum Design in SPDM for Device Authentication and Key Establishment
+// Page 16, Figure 3.
+
+theory PQSPDM_AKE_EventBased_Model
+begin
+
+#include "../KEMlibrary.splib"
+
+builtins: hashing, symmetric-encryption, signing
+
+functions:
+  mac/1, kdf/1
+
+tactic: secrecy_responder
+presort: S
+prio:
+  regex "!KU\( ~k"
+prio:
+  regex "!KU\( ~sk"
+prio:
+  regex "!KU\( rand_r"
+prio:
+  regex "!KU\( kdf"
+prio:
+  isFactName "Eph"
+deprio:
+  regex "!KU\( ~ct"
+deprio:
+  regex "!KU\( ~rand_i"
+
+tactic: secrecy_initiator
+presort: S
+prio:
+  regex "!KU\( ~k"
+prio:
+  regex "!KU\( ~sk"
+prio:
+  regex "!KU\( rand_i"
+prio:
+  regex "!KU\( kdf"
+prio:
+  isFactName "Eph"
+prio:
+  regex "!KU\( sign"
+prio:
+  regex "!KU\( mac"
+deprio:
+  regex "!KU\( ~ct"
+deprio:
+  regex "!KU\( ~rand_r"
+
+
+restriction Neq:
+  "All a b #i. Neq(a, b) @ i ==> not(a = b)"
+
+restriction Eq:
+  "All a b #i. Eq(a, b) @ i ==> a = b"
+
+restriction EphRevealOnlyOnce:
+  "All pk #i #j. RevealEph(pk) @ i & RevealEph(pk) @ j ==> #i=#j"
+
+
+
+// This is not a kem_pk but a signing pk
+rule static_keygen:
+ let
+  pk = pk(~sk)
+ in
+ [ Fr(~sk) ]
+ --[ HonestPk(pk) ]->
+ [ !Ltk(~sk, pk), Out(pk) ]
+
+rule static_reveal[color=a33b20]:
+ [ !Ltk(~sk, pk) ] --[ RevealLtk(pk) ]-> [ Out(~sk) ]
+
+rule ephemeral_keygen:
+ let
+  pk = kem_pk(~sk)
+ in
+ [ Fr(~sk) ]
+ --[ GoodKey(pk), EphOrigin(pk), HonestEph(pk) ]->
+ [ Eph(~sk, pk), Out(pk) ]
+
+rule ephemeral_reveal[color=a33b20]:
+ [ Eph(~sk, pk) ] --[ RevealEph(pk) ]-> [ Eph(~sk, pk), Out(~sk) ]
+
+rule Create_Initiator:
+  [ Fr(~IId), !Ltk(isk, ipk), Eph(esk_i, epk_i), In(peer) ]
+  --[ Neq(ipk, peer) ]->
+  [ Initiator_0(~IId, isk, ipk, esk_i, epk_i, peer) ]
+
+rule Create_Responder:
+  [ Fr(~RId), !Ltk(rsk, rpk), In(peer) ]
+  --[ Neq(rpk, peer) ]->
+  [ Responder_0(~RId, rsk, rpk, peer) ]
+
+rule Initiator_Keyex:
+  let
+    keyex_i = <~rand_i, epk_i>
+  in
+  [ Initiator_0(~IId, isk, ipk, esk_i, epk_i, rpk) 
+  , Fr(~rand_i) ]
+  --[ Initiator_Running(~IId, ipk, rpk, keyex_i), Reachable() ]->
+  [ Initiator_1(~IId, isk, ipk, esk_i, epk_i, rpk, keyex_i)
+  , Out(keyex_i) ]
+
+rule Responder_Keyex:
+  let
+    keyex_i = <~rand_i, epk_i>
+    rand_r = ~rand_r
+    wrapped_key = ct
+    keyex1_r = <rand_r, wrapped_key>
+    shared_key = kdf(<key, keyex_i, keyex1_r>)
+    sig_r = sign(<rpk, keyex_i, keyex1_r>, rsk)
+    mac_r = mac(<shared_key, rpk, keyex_i, keyex1_r, sig_r>)
+    keyex_r = <keyex1_r, sig_r, mac_r>
+  in
+  [ Responder_0(~RId, rsk, rpk, ipk), !KeyValues(key), !CTValues(ct)
+  , Fr(~rand_r) , In(keyex_i) ]
+
+  --[ Responder_Running(~RId, rpk, ipk, keyex_i, keyex_r, shared_key)
+    , Secret_Responder(~RId, rpk, ipk, epk_i, shared_key)
+    , Encaps(key, ct, epk_i) ]->
+
+  [ Responder_1(~RId, rsk, rpk, ipk, keyex_i, keyex_r, shared_key)
+  , Out(keyex_r) ]
+
+rule Initiator_Finish:
+  let
+    keyex_i = <~rand_i, epk_i>
+    keyex1_r = <rand_r, wrapped_key>
+    keyex_r = <keyex1_r, sig_r, mac_r>
+    final_key = kdf(<shared_key, keyex_i, keyex1_r>)
+    // Now the initiator creates their own sig/mac.
+    sig_i = sign(<rpk, keyex_i, keyex_r, ipk, 'Finish'>, isk)
+    mac_i = mac(<final_key, rpk, keyex_i, keyex_r, ipk, 'Finish', sig_i>)
+    finish_i = senc(<'Finish', sig_i, mac_i>, final_key)
+  in
+  [ Initiator_1(~IId, isk, ipk, esk_i, epk_i, rpk, keyex_i), In(keyex_r)
+  , !KeyValues(shared_key) ]
+  --[ Eq(verify(sig_r, <rpk, keyex_i, keyex1_r>, rpk), true)
+    , Eq(mac_r, mac(<final_key, rpk, keyex_i, keyex1_r, sig_r>))
+    , Decaps(shared_key, wrapped_key, epk_i, esk_i)
+    , Initiator_Derived(~IId, ipk, rpk, final_key)
+    , Secret_Initiator(~IId, ipk, rpk, epk_i, final_key) ]->
+  [ Out(finish_i), Initiator_2(~IId, isk, ipk, rpk, keyex_i, keyex_r, final_key) ]
+
+rule Responder_Finish:
+  let
+  finish_i = senc(<'Finish', sig_i, mac_i>, shared_key)
+  mac_i = mac(<shared_key, rpk, keyex_i, keyex_r, ipk, 'Finish', sig_i>)
+  finish_r = senc('Finish', shared_key)
+  in
+  [ Responder_1(~RId, rsk, rpk, ipk, keyex_i, keyex_r, shared_key), In(finish_i) ]
+  --[ Eq(verify(sig_i, <rpk, keyex_i, keyex_r, ipk, 'Finish'>, ipk), true),
+      Responder_Commit(~RId, rpk, ipk, snd(keyex_i), shared_key)
+    , Responder_Derived(~RId, rpk, ipk, shared_key) ]->
+  [ Out(finish_r) ]
+
+rule Initiator_Confirm:
+  let
+  finish_r = senc('Finish', final_key)
+  in
+  [ Initiator_2(~IId, isk, ipk, rpk, keyex_i, keyex_r, final_key), In(finish_r) ]
+  --[ Initiator_Commit(~IId, ipk, rpk, snd(keyex_i), final_key)
+    ]->
+  []
+
+lemma originEph[sources]:
+  "All pk #k.
+      RevealEph(pk) @ k ==> (Ex #i. EphOrigin(pk) @ i)"
+
+
+lemma Executable: exists-trace
+  "Ex IId RPk IPk RId keyex_i keyex_r shared_key EPk #i #j #k #l #n #o.
+   HonestPk(RPk) @ i & HonestPk(IPk) @ j &
+   Initiator_Running(IId, IPk, RPk, keyex_i) @ k &
+   Initiator_Commit(IId, IPk, RPk, EPk, shared_key) @ l &
+   Responder_Running(RId, RPk, IPk, keyex_i, keyex_r, shared_key) @ n &
+   Responder_Commit(RId, RPk, IPk, EPk, shared_key) @ o &
+   not(Ex #p. RevealLtk(RPk) @ p) &
+   not(Ex #q. RevealLtk(IPk) @ q)"
+
+lemma Key_Uniqueness_Initiator_helper [reuse]:
+  "All IId1 IId2 IPk1 IPk2 RPk1 RPk2 Key #i #j #h.
+       Initiator_Derived(IId1, IPk1, RPk1, Key) @ i &
+       Initiator_Derived(IId2, IPk2, RPk2, Key) @ j & i < j &
+       HonestPk(RPk1) @ h
+       ==> F"
+
+lemma Key_Uniqueness_Initiator [reuse]:
+  "All IId1 IId2 IPk1 IPk2 RPk1 RPk2 Key #i #j #h.
+       Initiator_Derived(IId1, IPk1, RPk1, Key) @ i & not(#i = #j) &
+       Initiator_Derived(IId2, IPk2, RPk2, Key) @ j &
+       HonestPk(RPk1) @ h
+       ==> F"
+
+lemma Key_Uniqueness_Responder_helper [reuse]:
+  "All RId1 RId2 RPk1 RPk2 IPk1 IPk2 Key #i #j #h.
+       Responder_Derived(RId1, RPk1, IPk1, Key) @ i &
+       Responder_Derived(RId2, RPk2, IPk2, Key) @ j & i < j &
+       HonestPk(IPk1) @ h
+       ==> F"
+
+lemma Key_Uniqueness_Responder [reuse]:
+  "All RId1 RId2 RPk1 RPk2 IPk1 IPk2 Key #i #j #h.
+       Responder_Derived(RId1, RPk1, IPk1, Key) @ i & not(#i = #j) &
+       Responder_Derived(RId2, RPk2, IPk2, Key) @ j &
+       HonestPk(IPk1) @ h
+       ==> F"
+
+lemma Keyex_Unique_Initiator [reuse]:
+  "All IId1 IId2 IPk1 IPk2 RPk1 RPk2 Keyex #i #j #h.
+       Initiator_Running(IId1, IPk1, RPk1, Keyex) @ i & not(#i = #j) &
+       Initiator_Running(IId2, IPk2, RPk2, Keyex) @ j & HonestPk(RPk1) @ h
+       ==> F"
+
+lemma Keyex_Unique_Responder [reuse]:
+  "All IId1 IId2 IPk1 IPk2 RPk1 RPk2 KeyexI KeyexR Key #i #j #h.
+       Responder_Running(IId1, IPk1, RPk1, KeyexI, KeyexR, Key) @ i & not(#i = #j) &
+       Responder_Running(IId2, IPk2, RPk2, KeyexI, KeyexR, Key) @ j & HonestPk(RPk1) @ h
+       ==> F"
+
+lemma Secrecy_Initiator_Unless_Reveal_Eph_Or_Ltk[heuristic={secrecy_initiator}]:
+  "All IId Ipk Rpk Epki Key #i #j.
+       Secret_Initiator(IId, Ipk, Rpk, Epki, Key) @ i &
+       HonestPk(Rpk) @ j
+       ==> (not(Ex #j. K(Key) @ j))
+       | (Ex #j. RevealEph(Epki) @ j)
+       | (Ex #j. RevealLtk(Rpk) @ j)"
+
+lemma Secrecy_Initiator_Unless_Reveal_Eph[heuristic={secrecy_initiator}]:
+  "All IId Ipk Rpk Epki Key #i #j.
+       Secret_Initiator(IId, Ipk, Rpk, Epki, Key) @ i &
+       HonestPk(Rpk) @ j
+       ==> (not(Ex #j. K(Key) @ j))
+       | (Ex #j. RevealEph(Epki) @ j)"
+
+lemma Secrecy_Initiator_Unless_Reveal_Ltk[heuristic={secrecy_initiator}]:
+  "All IId Ipk Rpk Epki Key #i #j.
+       Secret_Initiator(IId, Ipk, Rpk, Epki, Key) @ i &
+       HonestPk(Rpk) @ j
+       ==> (not(Ex #j. K(Key) @ j))
+       | (Ex #j. RevealLtk(Rpk) @ j)"
+
+lemma Secrecy_Responder_Unless_Reveal_Eph_Or_Ltk[use_induction, heuristic={secrecy_responder}]:
+  "All RId Key Rpk Ipk Epki #i #j #k.
+       Secret_Responder(RId, Rpk, Ipk, Epki, Key) @ i &
+       HonestPk(Ipk) @ j & HonestEph(Epki) @ k
+       ==> (not(Ex #j. K(Key) @ j))
+         | (Ex #j. RevealLtk(Ipk) @ j)
+         | (Ex #j. RevealEph(Epki) @ j)"
+
+lemma Secrecy_Responder_Unless_Reveal_Eph[use_induction, heuristic={secrecy_responder}]:
+  "All RId Key Rpk Ipk Epki #i #j #k.
+       Secret_Responder(RId, Rpk, Ipk, Epki, Key) @ i &
+       HonestPk(Ipk) @ j & HonestEph(Epki) @ k
+       ==> (not(Ex #j. K(Key) @ j))
+         | (Ex #j. RevealEph(Epki) @ j)"
+
+lemma Secrecy_Responder_Unless_Reveal_Ltk[use_induction, heuristic={secrecy_responder}]:
+  "All RId Key Rpk Ipk Epki #i #j #k.
+       Secret_Responder(RId, Rpk, Ipk, Epki, Key) @ i &
+       HonestPk(Ipk) @ j & HonestEph(Epki) @ k
+       ==> (not(Ex #j. K(Key) @ j))
+         | (Ex #j. RevealLtk(Ipk) @ j)"
+
+lemma Implicit_Key_Authentication_Initiator_Honest_Pk[heuristic={secrecy_initiator}]:
+  "All IId RId IPk IPk1 RPk RPk1 EPk EPk1 Key #i #j #h. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j &
+       HonestPk(RPk) @ h
+       ==> RPk = RPk1 & IPk = IPk1"
+
+lemma Implicit_Key_Authentication_Initiator_NoLtkReveals[heuristic={secrecy_initiator}]:
+  "All IId RId IPk IPk1 RPk RPk1 EPk EPk1 Key #i #j #h. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j &
+       HonestPk(RPk) @ h
+       & not(Ex #v. RevealLtk(RPk) @ v)
+       ==> RPk = RPk1 & IPk = IPk1"
+
+lemma Implicit_Key_Authentication_Initiator_NoEphReveal[heuristic={secrecy_initiator}]:
+  "All IId RId IPk IPk1 RPk RPk1 EPk EPk1 Key #i #j. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j
+       & not(Ex #v. RevealEph(EPk) @ v)
+       ==> RPk = RPk1 & IPk = IPk1"
+
+lemma Implicit_Key_Authentication_Initiator_Honest_Pk_NoLtkReveals[heuristic={secrecy_initiator}]:
+  "All IId RId IPk IPk1 RPk RPk1 EPk EPk1 Key #i #j #h. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j &
+       HonestPk(RPk) @ h
+       & not(Ex #v. RevealLtk(RPk) @ v)
+       ==> RPk = RPk1 & IPk = IPk1"
+
+
+lemma Implicit_Key_Authentication_Responder_Honest_Pk[heuristic={secrecy_responder}]:
+  "All IId RId IPk IPk1 RPk RPk1 EPk EPk1 Key #i #j #h. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j &
+       HonestPk(IPk1) @ h
+       ==> RPk = RPk1 & IPk = IPk1"
+
+lemma Implicit_Key_Authentication_Responder_NoLtkReveals[heuristic={secrecy_responder}]:
+  "All IId RId IPk IPk1 RPk RPk1 EPk EPk1 Key #i #j #h. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j &
+       HonestPk(IPk1) @ h
+       & not(Ex #v. RevealLtk(IPk1) @ v)
+       ==> RPk = RPk1 & IPk = IPk1"
+
+lemma Implicit_Key_Authentication_Responder_NoEphReveal[heuristic={secrecy_responder}]:
+  "All IId RId IPk IPk1 RPk RPk1 EPk EPk1 Key #i #j. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j
+       & not(Ex #v. RevealEph(EPk1) @ v)
+       ==> RPk = RPk1 & IPk = IPk1"
+
+lemma Full_Key_Confirmation_Initiator_Unless_Reveal_Eph[heuristic={secrecy_initiator}]:
+  "All IId IPk RPk Key EPk #i #j. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       HonestPk(RPk) @ j &
+       not(Ex #h. RevealEph(EPk) @ h)
+       ==> (Ex RId RPk1 IPk1 EPk1 #j. Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j)"
+
+lemma Full_Key_Confirmation_Initiator_Unless_Reveal_Ltk[heuristic={secrecy_initiator}]:
+  "All IId IPk RPk Key EPk #i #j. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       HonestPk(RPk) @ j &
+       not(Ex #h. RevealLtk(RPk) @ h)
+       ==> (Ex RId RPk1 IPk1 EPk1 #j. Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j)"
+
+lemma Full_Key_Confirmation_Initiator_Unless_Reveal_Eph_Or_Ltk[heuristic={secrecy_initiator}]:
+  "All IId IPk RPk Key EPk #i #j. 
+       Initiator_Commit(IId, IPk, RPk, EPk, Key) @ i &
+       HonestPk(RPk) @ j &
+       not(Ex #h. RevealEph(EPk) @ h) &
+       not(Ex #h. RevealLtk(RPk) @ h)
+       ==> (Ex RId RPk1 IPk1 EPk1 #j. Responder_Commit(RId, RPk1, IPk1, EPk1, Key) @ j)"
+
+lemma Full_Key_Confirmation_Responder[heuristic={secrecy_responder}]:
+  "All RId IPk RPk Key EPk #i #j #k. 
+       Responder_Commit(RId, RPk, IPk, EPk, Key) @ i &
+       HonestPk(IPk) @ j & HonestEph(EPk) @ k
+       ==> (Ex RId IPk1 RPk1 #j. Initiator_Derived(RId, RPk1, IPk1, Key) @ j)"
+
+lemma Full_Key_Confirmation_Responder_Unless_Reveal_Eph[heuristic={secrecy_responder}]:
+  "All RId IPk RPk Key EPk #i #j #k. 
+       Responder_Commit(RId, RPk, IPk, EPk, Key) @ i &
+       HonestPk(IPk) @ j & HonestEph(EPk) @ k&
+       not(Ex #h. RevealEph(EPk) @ h)
+       ==> (Ex RId IPk1 RPk1 #j. Initiator_Derived(RId, RPk1, IPk1, Key) @ j)"
+
+lemma Full_Key_Confirmation_Responder_Unless_Reveal_Ltk[heuristic={secrecy_responder}]:
+  "All RId IPk RPk Key EPk #i #j #k. 
+       Responder_Commit(RId, RPk, IPk, EPk, Key) @ i &
+       HonestPk(IPk) @ j & HonestEph(EPk) @ k&
+       not(Ex #h. RevealLtk(IPk) @ h)
+       ==> (Ex RId IPk1 RPk1 #j. Initiator_Derived(RId, RPk1, IPk1, Key) @ j)"
+
+
+end

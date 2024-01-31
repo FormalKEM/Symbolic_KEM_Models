@@ -1,0 +1,128 @@
+K_Bind_Ct.spthy,propertyHolds ,[],False
+K_Bind_Ct.spthy,propertyHolds ,['MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindkcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindkcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindpkktoct'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindpkktoct', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindkcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindkcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindkcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindkcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindkcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindkcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindpkktoct'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindpkktoct', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttopk', 'bindkcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttopk', 'bindkcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttopk', 'bindpkktoct'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttopk', 'bindpkktoct', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindkcttopk', 'bindpkktoct'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindkcttopk', 'bindpkktoct', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindkcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindkcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindkcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindkcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttopk', 'bindkcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttopk', 'bindkcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindkcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindkcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttopk', 'bindkcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttopk', 'bindkcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindcttopk', 'bindkcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindcttopk', 'bindkcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindcttopk', 'bindpkktoct'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindcttopk', 'bindpkktoct', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindkcttopk', 'bindpkktoct'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindkcttopk', 'bindpkktoct', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttopk', 'bindkcttopk', 'bindpkktoct'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindkcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindkcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttopk', 'bindkcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttopk', 'bindkcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindcttopk', 'bindkcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttopk', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindcttopk', 'bindkcttopk'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttopk', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindcttopk', 'bindkcttopk', 'bindpkktoct'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindcttok', 'bindcttopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],False
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindcttopk', 'bindkcttopk'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttopk', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktopk', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'bindpkktoct'],True
+K_Bind_Ct.spthy,propertyHolds ,['bindktoct', 'bindktopk', 'bindcttok', 'bindcttopk', 'bindkcttopk', 'bindpkktoct', 'MAL'],True

@@ -1,0 +1,33 @@
+theory Ct_Bind_K begin
+
+#include "../KEMlibrary.splib"
+
+
+restriction Neq:
+  "All a b #i. Neq(a, b) @ i ==> not(a = b)"
+
+restriction Eq:
+  "All a b #i. Eq(a, b) @ i ==> a = b"
+
+
+rule HonestKeyGen:
+ [ Fr(~key) ]
+ --[ GoodKey(kem_pk(~key)) ]->
+ [ !Pk(~key, kem_pk(~key)), Out(kem_pk(~key)) ]
+
+rule DecryptionOracle:
+ [ In(ct), In(pk), !Pk(sk, pk), !KeyValues(k) ]
+ --[ Decaps(k, ct, pk, sk) ]->
+ [ Out(k) ]
+
+rule Ct_Bind_K:
+ [ !Pk(sk0, pk0), !Pk(sk1, pk1), In(<ct0, ct1>), !KeyValues(k0), !KeyValues(k1) ]
+ --[ Decaps(k0, ct0, pk0, sk0), Decaps(k1, ct1, pk1, sk1)
+   , Adv_Wins(), Eq(ct0, ct1), Neq(k0, k1) ]->
+ []
+
+
+lemma propertyHolds:
+ "All #i. Adv_Wins() @ i ==> F"
+
+end

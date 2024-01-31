@@ -1,0 +1,126 @@
+
+/*
+ *  Author: Anonymous
+ *  Model Name: Example.spthy
+ *  Status: DEVELOPMENTAL
+ *
+ *  Comments: Should serve as an example for the KEMlibrary.splib
+ */
+
+theory OnepassAKE
+begin
+
+#include "../KEMlibrary.splib"
+
+rule KeyGen:
+    [ Fr(~sk) ]
+    --[ GoodKey(kem_pk(~sk)), Honest(kem_pk(~sk)) ]->
+    [ !Ltk(~sk, kem_pk(~sk)), Out(kem_pk(~sk)) ]
+
+rule KeyReveal[color=a33b20]:
+ [ !Ltk(~sk, pk) ] --[ RevealLtk(pk) ]-> [ Out(~sk) ]
+
+rule InitA:
+    [ !Ltk(skA, pkA), In(peer), Fr(~aid) ]
+    --[ _restrict(not(pkA=peer)) ]->
+    [ StateA(~aid, skA, pkA, peer) ]
+
+rule InitB:
+    [ !Ltk(skB, pkB), In(peer), Fr(~bid) ]
+    --[ _restrict(not(pkB=peer)) ]->
+    [ StateB(~bid, skB, pkB, peer) ]
+
+rule AEncaps:
+    [ StateA(~aid, skA, pkA, pkB), !KeyValues(~k), !CTValues(~ct)]
+    --[ Encaps(~k, ~ct, pkB), KeyA(~aid, pkA, pkB, ~k, ~ct) ]->
+    [ Out(~ct) ]
+
+rule BDecaps:
+    [ StateB(~bid, skB, pkB, pkA), In(ct), !KeyValues(~k) ]
+    --[ Decaps(~k, ct, kem_pk(skB), skB), KeyB(~bid, pkA, pkB, ~k, ct) ]->
+    []
+
+
+//==================================================================
+//================== PROTOCOL PROPERTIES ===========================
+//==================================================================
+ 
+
+// Trace between two honest participants
+lemma HonestKeyTrace: exists-trace
+"
+Ex aid bid pkA pkB k ct #i #j #k #l. Honest(pkA)@#k & Honest(pkB)@#l & KeyA(aid, pkA, pkB, k, ct)@#i & KeyB(bid, pkA, pkB, k, ct)@#j
+"
+
+// Trace between honest B and adv A with good key.
+lemma GoodKeyTrace: exists-trace
+"
+Ex bid pkA pkB k ct #j #k #l. GoodKey(pkA)@#k & Honest(pkB)@#l & KeyB(bid, pkA, pkB, k, ct)@#j & not(Ex #o. Honest(pkA)@#o)
+"
+
+// Trace between honest B and adv A with bad key.
+lemma BadKeyTrace: exists-trace
+"
+Ex bid pkA pkB k ct #j #l. Honest(pkB)@#l & KeyB(bid, pkA, pkB, k, ct)@#j & not(Ex #o. GoodKey(pkA)@#o)
+"
+
+lemma SecretKeyA_Unless_Reveal:
+"
+All id pkA pkB k ct #i #k. KeyA(id, pkA, pkB, k, ct)@#i & Honest(pkB)@#k ==> (not( Ex #j. K(k)@#j ) | (Ex #j. RevealLtk(pkB)@#j))
+"
+
+lemma SecretKeyA:
+"
+All id pkA pkB k ct #i #k. KeyA(id, pkA, pkB, k, ct)@#i & Honest(pkB)@#k ==> not( Ex #j. K(k)@#j )
+"
+
+lemma SecretKeyB_Unless_Reveal:
+"
+All id pkA pkB k ct #i #k. KeyB(id, pkA, pkB, k, ct)@#i & Honest(pkA)@#k ==> (not( Ex #j. K(k)@#j ) | (Ex #j. RevealLtk(pkA)@#j))
+"
+
+// Should falsify
+lemma SecretKeyB:
+"
+All id pkA pkB k ct #i #k. KeyB(id, pkA, pkB, k, ct)@#i & Honest(pkA)@#k ==> not( Ex #j. K(k)@#j )
+"
+
+//Should be true
+lemma SecretKeyB_GoodSession:
+"
+All id id2 pkA pkB k ct #i #m #k. KeyB(id, pkA, pkB, k, ct)@#i & KeyA(id2, pkA, pkB, k, ct)@#m & Honest(pkA)@#k ==> (not( Ex #j. K(k)@#j ) | (Ex #j. RevealLtk(pkA)@#j) | (Ex #j. RevealLtk(pkB)@#j))
+"
+
+lemma ImplicitKeyAuthA:
+"
+All id id2 pkA pkA2 pkB pkB2 k ct ct2 #i #j #k. 
+            KeyA(id, pkA, pkB, k, ct)@#i &
+            KeyB(id2, pkA2, pkB2, k, ct2)@#j & Honest(pkB)@#k ==>
+            (pkB=pkB2) 
+"
+
+lemma ImplicitKeyAuthB:
+"
+All id id2 pkA pkA2 pkB pkB2 k ct ct2 #i #j #k. 
+            KeyA(id, pkA, pkB, k, ct)@#i & Honest(pkA2)@#k &
+            KeyB(id2, pkA2, pkB2, k, ct2)@#j ==>
+            (pkA=pkA2)
+"
+
+lemma ImplicitKeyAuthA_full:
+"
+All id id2 pkA pkA2 pkB pkB2 k ct ct2 #i #j #k. 
+            KeyA(id, pkA, pkB, k, ct)@#i &
+            KeyB(id2, pkA2, pkB2, k, ct2)@#j & Honest(pkB)@#k ==>
+            (pkA=pkA2 & pkB=pkB2) 
+"
+
+lemma ImplicitKeyAuthB_full:
+"
+All id id2 pkA pkA2 pkB pkB2 k ct ct2 #i #j #k. 
+            KeyA(id, pkA, pkB, k, ct)@#i & Honest(pkA2)@#k &
+            KeyB(id2, pkA2, pkB2, k, ct2)@#j ==>
+            (pkA=pkA2 & pkB=pkB2) 
+"
+
+end

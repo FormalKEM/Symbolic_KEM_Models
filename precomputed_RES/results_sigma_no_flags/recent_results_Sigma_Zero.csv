@@ -1,0 +1,8 @@
+Secrecy_Good_Session ,True,4.13992166519165,73,[]
+Secrecy_Initiator ,True,5.332499742507935,106,[]
+Secrecy_Responder ,True,3.043246269226074,26,[]
+Implicit_Key_Authentication_Initiator ,False,14.600236415863037,32,[]
+Implicit_Key_Authentication_Responder ,True,5.924659013748169,176,[]
+SK_Authentication ,False,20.32759404182434,32,[]
+Full_Key_Confirmation_Responder_Unless_Reveal_Ltk ,True,5.961204290390015,105,[]
+Full_Key_Confirmation_Responder ,True,6.3910157680511475,111,[]

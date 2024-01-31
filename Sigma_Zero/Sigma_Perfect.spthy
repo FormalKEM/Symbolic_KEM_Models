@@ -1,0 +1,206 @@
+
+// Based on Post Quantum Design of Chris Peikert in "Lattice Cryptography for the Internet"
+// Page 19
+
+theory Sigma_Zero_Prime_WithRespState
+begin
+
+#include "../KEMlibrary.splib"
+
+builtins: hashing, symmetric-encryption, signing
+
+functions:
+  mac/2, kdf/1, f/2
+/*
+tactic: secrecy
+presort: S
+prio:
+  isFactName "Eph"
+prio:
+  regex "Encaps\("
+prio:
+  regex "!KU\( ~sk"
+prio:
+  regex "!KU\( ~k"
+prio:
+  regex "!KU\( h\("
+prio:
+  regex "!KU\( sign\("
+prio:
+  regex "!KU\( mac\("
+prio:
+  regex "!KU\( ~sid"
+deprio:
+  regex "!KU\( ~ct"
+deprio:
+  regex "!KU\( kem_pk\("
+*/
+
+restriction Neq:
+  "All a b #i. Neq(a, b) @ i ==> not(a = b)"
+
+restriction Eq:
+  "All a b #i. Eq(a, b) @ i ==> a = b"
+
+restriction OneResponderSessionPerID:
+  "All id rsk #i #j. Once(id, rsk) @ i & Once(id, rsk) @ j ==> #i=#j"
+
+
+rule static_keygen:
+ [ Fr(~sk) ]
+ --[ HonestPk(pk(~sk)) ]->
+ [ !Ltk(~sk, pk(~sk)), Out(pk(~sk)) ]
+
+rule static_reveal[color=a33b20]:
+ [ !Ltk(~sk, pk) ] --[ RevealLtk(pk) ]-> [ Out(~sk) ]
+
+rule ephemeral_keygen:
+ let
+  pk = kem_pk(~sk)
+ in
+ [ Fr(~sk) ]
+ --[ HonestEPk(pk), GoodKey(pk), EphOrigin(pk) ]->
+ [ Eph(~sk, pk), Out(pk) ]
+
+
+rule Create_Initiator:
+  [ !Ltk(isk, ipk), In(peer) ]
+  --[ Neq(ipk, peer) ]->
+  [ Initiator_0(isk, ipk, peer) ]
+
+rule Create_Responder:
+  [ !Ltk(rsk, rpk), In(peer) ]
+  --[ Neq(rpk, peer) ]->
+  [ Responder_0(rsk, rpk, peer) ]
+
+rule Initiator_Start_Message:
+    [ Fr(~sid), Eph(esk_i, epk_i), Initiator_0(isk, ipk, peer) ]
+    --[ StartMessage(~sid, isk, ipk, esk_i, epk_i) ]->
+    [ Initiator_1(isk, ipk, esk_i, epk_i, peer, ~sid), Out(<~sid,epk_i>)]
+
+rule Responder_Message:
+    let
+        k0 = f(k,'0')
+        k1 = f(k,'1')
+        sig = sign(<'1',sid,epk_i,ct>,rsk)
+        tag = mac(k1,<'1',sid,rpk>)
+        out = <sid, ct, rpk, sig, tag>
+    in
+    [ In(<sid,epk_i>), Responder_0(rsk, rpk, peer), !KeyValues(k), !CTValues(ct) ]
+    --[ Encaps(k, ct, epk_i), Once(sid, rsk) ]->
+    [ Responder_1(rsk, rpk, peer, sid, k0, k1, epk_i, ct), Out(out) ]
+
+rule Initiator_Finish_Message:
+    let
+        k0 = f(k,'0')
+        k1 = f(k,'1')
+        sig_init = sign(<'0',sid,ct,epk_i>,isk)
+        tag_init = mac(k1,<'0',sid,ipk>)
+        finish = <sid, ipk, sig_init, tag_init>
+        rpk = peer
+    in
+    [ Initiator_1(isk, ipk, esk_i, epk_i, peer, sid)
+    , In(<sid, ct, rpk, sig, mac(k1,<'1',sid,rpk>)>)
+    , !KeyValues(k) ]
+    --[ Decaps(k, ct, epk_i, esk_i),
+        Eq(true,verify(sig,<'1',sid,epk_i,ct>,rpk)),
+        Initiator_Finish(ipk,sid,rpk,k0,epk_i) ]->
+    [ Out(finish) ]
+
+rule Responder_Completion:
+    [ Responder_1(rsk, rpk, peer, sid, k0, k1, epki, ct)
+    , In(<sid, ipk, sig, mac(k1,<'0',sid,ipk>)>)]
+    --[ Eq(true,verify(sig,<'0',sid,ct,epki>,ipk)),
+        Responder_Finish(rpk,sid,ipk,k0,epki) ]->
+    [  ]
+
+
+
+lemma Secrecy_Good_Session [use_induction]:
+  "All Ipk sid Rpk k epki #i #t.
+       Initiator_Finish(Ipk,sid,Rpk,k,epki) @ i
+       & Responder_Finish(Rpk,sid,Ipk,k,epki) @ t
+       ==> (not(Ex #j. K(k) @ j))
+       | (not(Ex #j. HonestEPk(epki) @ j))
+       | (Ex #j. RevealLtk(Rpk) @ j)"
+
+lemma Secrecy_Initiator [use_induction]:
+  "All Ipk sid Rpk k epki #i #t.
+       Initiator_Finish(Ipk,sid,Rpk,k,epki) @ i
+       & HonestPk(Rpk) @ t
+       ==> (not(Ex #j. K(k) @ j))
+       | (not(Ex #j. HonestEPk(epki) @ j))
+       | (Ex #j. RevealLtk(Rpk) @ j)"
+
+lemma Secrecy_Responder[use_induction]:
+  "All Ipk sid Rpk k epki #i #t.
+       Responder_Finish(Rpk,sid,Ipk,k,epki) @ i
+       & HonestPk(Ipk) @ t
+       ==> (not(Ex #j. K(k) @ j))
+       | (not(Ex #j. HonestEPk(epki) @ j))
+       | (Ex #j. RevealLtk(Ipk) @ j)"
+
+/*lemma Implicit_Key_Authentication_Initiator_eph [use_induction]:
+  "All Ipk Ipk1 sid Rpk Rpk1 k epki epki1 #i #j #t.
+       Initiator_Finish(Ipk,sid,Rpk,k,epki) @ i &
+       Responder_Finish(Rpk1,sid,Ipk1,k,epki1) @ j &
+       HonestEPk(epki) @ t 
+       ==> epki = epki1"
+
+lemma Implicit_Key_Authentication_Responder_eph [use_induction]:
+  "All Ipk Ipk1 sid Rpk Rpk1 k epki epki1 #i #j #t.
+       Initiator_Finish(Ipk,sid,Rpk,k,epki) @ i &
+       Responder_Finish(Rpk1,sid,Ipk1,k,epki1) @ j &
+       HonestEPk(epki1) @ t 
+       ==> epki = epki1"*/
+
+lemma Implicit_Key_Authentication_Initiator [use_induction]:
+  "All Ipk Ipk1 sid Rpk Rpk1 k epki epki1 #i #j #t.
+       Initiator_Finish(Ipk,sid,Rpk,k,epki) @ i &
+       Responder_Finish(Rpk1,sid,Ipk1,k,epki1) @ j &
+       HonestPk(Rpk) @ t
+       //HonestEPk(epki) @ t 
+       ==> Ipk = Ipk1 & Rpk = Rpk1"
+
+       
+lemma Implicit_Key_Authentication_Responder [use_induction]:
+  "All Ipk Ipk1 sid Rpk Rpk1 k epki epki1 #i #j #t #x.
+       Initiator_Finish(Ipk,sid,Rpk,k,epki) @ i &
+       Responder_Finish(Rpk1,sid,Ipk1,k,epki1) @ j &
+       HonestPk(Ipk1) @ x &
+       HonestEPk(epki1) @ t 
+       ==> Ipk = Ipk1 & Rpk = Rpk1"
+
+
+lemma SK_Authentication [use_induction]:
+  "All Ipk sid Rpk k k1 epki epki1 #i #j.
+       Initiator_Finish(Ipk,sid,Rpk,k,epki) @ i &
+       Responder_Finish(Rpk,sid,Ipk,k1,epki1) @ j &
+       not(Ex #x. RevealLtk(Ipk) @ x) &
+       not(Ex #y. RevealLtk(Rpk) @ y)
+       ==> k = k1"
+
+lemma SK_Authentication_With_Eph [use_induction]:
+  "All Ipk sid Rpk k k1 epki #i #j.
+       Initiator_Finish(Ipk,sid,Rpk,k,epki) @ i &
+       Responder_Finish(Rpk,sid,Ipk,k1,epki) @ j &
+       not(Ex #x. RevealLtk(Ipk) @ x) &
+       not(Ex #y. RevealLtk(Rpk) @ y)
+       ==> k = k1"
+
+
+lemma Full_Key_Confirmation_Responder_Unless_Reveal_Ltk[use_induction]:
+  "All Ipk sid Rpk k epki #i #j #l.
+       Responder_Finish(Rpk,sid,Ipk,k,epki) @ i &
+       HonestPk(Ipk) @ j &
+       HonestEPk(epki) @ l &
+       not(Ex #t. RevealLtk(Ipk) @ t)
+       ==> (Ex Rpk1 Ipk1 epki1 #q. Initiator_Finish(Ipk1,sid,Rpk1,k,epki1) @ q)"
+
+lemma Full_Key_Confirmation_Responder[use_induction]:
+  "All Ipk sid Rpk k epki #i #l.
+       Responder_Finish(Rpk,sid,Ipk,k,epki) @ i &
+       HonestEPk(epki) @ l 
+       ==> (Ex Rpk1 Ipk1 epki1 #q. Initiator_Finish(Ipk1,sid,Rpk1,k,epki1) @ q)"
+
+end

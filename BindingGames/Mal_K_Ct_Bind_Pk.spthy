@@ -1,0 +1,33 @@
+theory Mal_K_Ct_Bind_Pk begin
+
+#include "../KEMlibrary.splib"
+
+
+restriction Neq:
+  "All a b #i. Neq(a, b) @ i ==> not(a = b)"
+
+restriction Eq:
+  "All a b #i. Eq(a, b) @ i ==> a = b"
+
+rule K_Ct_Bind_Pk_Decaps:
+ [ In(<sk0, pk0>), In(<sk1, pk1>), In(<ct0, ct1>), !KeyValues(k0), !KeyValues(k1) ]
+ --[ Decaps(k0, ct0, pk0, sk0), Decaps(k1, ct1, pk1, sk1)
+   , Adv_Wins(), Eq(ct0, ct1), Eq(k0, k1), Neq(pk0, pk1) ]->
+ []
+
+rule K_Ct_Bind_Pk_Encaps:
+ [ In(<sk0, pk0>), In(<sk1, pk1>), In(<ct0, ct1>), !KeyValues(k0), !KeyValues(k1) ]
+ --[ Encaps(k0, ct0, pk0), Encaps(k1, ct1, pk1)
+   , Adv_Wins(), Eq(ct0, ct1), Eq(k0, k1), Neq(pk0, pk1) ]->
+ []
+
+rule K_Ct_Bind_Pk_Decaps_Encaps:
+ [ In(<sk0, pk0>), In(<sk1, pk1>), In(<ct0, ct1>), !KeyValues(k0), !KeyValues(k1) ]
+ --[ Encaps(k0, ct0, pk0), Decaps(k1, ct1, pk1, sk1)
+   , Adv_Wins(), Eq(ct0, ct1), Eq(k0, k1), Neq(pk0, pk1) ]->
+ []
+
+lemma propertyHolds:
+ "All #i. Adv_Wins() @ i ==> F"
+
+end
